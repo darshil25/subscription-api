@@ -47,7 +47,6 @@ const subscriptionSchema = new mongoose.Schema({
   },
   renewalDate: {
     type: Date,
-    required: true,
     validate: {
       validator: function (value) {
         return value > this.startDate;
@@ -70,23 +69,20 @@ subscriptionSchema.pre('save', function (next) {
       daily: 1,
       weekly: 7,
       monthly: 30,
-      yearly: 365
+      yearly: 365,
     };
-
-    //if start is on jan 1 and frequency is monthly 
-    //it make renewal date to jan 1  + 30 => 31 jan
 
     this.renewalDate = new Date(this.startDate);
     this.renewalDate.setDate(this.renewalDate.getDate() + renewalPeriods[this.frequency]);
   }
 
-  // auto updating subscription status based opn renewal date
-  if(this.renewalDate < new Date()){
+  // Auto-update the status if renewal date has passed
+  if (this.renewalDate < new Date()) {
     this.status = 'expired';
   }
 
-  next(); // now proceeding to creating rest of fields in db
-})
+  next();
+});
 
 const Subscription = mongoose.model('Subscription', subscriptionSchema)
 
